@@ -158,3 +158,44 @@ def test_new_game_respects_hard_range():
         import random
         secret = random.randint(low, high)
         assert 1 <= secret <= 100, f"Hard game secret {secret} outside range 1-100"
+
+
+# ============================================================================
+# Bug #5: Difficulty switching without regeneration
+# ============================================================================
+
+def test_difficulty_range_boundaries():
+    # FIX: Verify no secret from one difficulty exceeds another's range
+    # When switching difficulty, secret must be regenerated or it will be invalid
+    # Example: secret=45 from Normal (1-50) cannot exist in Easy (1-20)
+    easy_low, easy_high = get_range_for_difficulty("Easy")
+    normal_low, normal_high = get_range_for_difficulty("Normal")
+    hard_low, hard_high = get_range_for_difficulty("Hard")
+
+    # If you play Normal and get secret 45, switching to Easy would break the game
+    normal_secret = 45
+    assert not (easy_low <= normal_secret <= easy_high), \
+        f"Secret {normal_secret} from Normal shouldn't fit in Easy range"
+
+    # Verify ranges are properly separated
+    assert easy_high < normal_high, "Easy max should be less than Normal max"
+    assert normal_high < hard_high, "Normal max should be less than Hard max"
+
+
+# ============================================================================
+# Bug #6 & #7: Backwards hints and New Game button issues
+# ============================================================================
+
+def test_hint_too_high_says_go_lower():
+    # FIX: When guess is too high, hint should say go LOWER, not HIGHER
+    outcome, message = check_guess(60, 50)
+    assert outcome == "Too High"
+    assert "LOWER" in message, f"Hint should say Go LOWER but says: {message}"
+    assert "HIGHER" not in message
+
+def test_hint_too_low_says_go_higher():
+    # FIX: When guess is too low, hint should say go HIGHER, not LOWER
+    outcome, message = check_guess(40, 50)
+    assert outcome == "Too Low"
+    assert "HIGHER" in message, f"Hint should say Go HIGHER but says: {message}"
+    assert "LOWER" not in message

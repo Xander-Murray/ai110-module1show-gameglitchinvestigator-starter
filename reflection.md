@@ -40,14 +40,23 @@ With the buggy code, this would fail because it was sometimes doing string compa
 ## 4. What did you learn about Streamlit and state?
 
 - In your own words, explain why the secret number kept changing in the original app.
+  The secret didn't necessarily "keep changing" in the traditional sense, but it was
+  generated incorrectly when you clicked "New Game" or switched difficulty. The New Game button was hardcoded to generate from random.randint(1, 100) always, so if you switched to Easy (1-20) and clicked New Game, the secret could be way outside your playable range (like 87), making the game unplayable for that difficulty. Additionally, the difficulty-specific range wasn't being used, so there was a mismatch between what range you thought you were playing in versus what the game actually was.
+
 - How would you explain Streamlit "reruns" and session state to a friend who has never used Streamlit?
+  Streamlit reruns the entire script from top to bottom every time you interact with it—click a button, type in a box, move a slider. It's like the whole app refreshes. But session state is Streamlit's memory that persists across these reruns. Without session state, your game progress would reset on every interaction. Session state lets you store things like the secret number, attempts count, and score so they survive the reruns.
+
 - What change did you make that finally gave the game a stable secret number?
+  The key fix was making the New Game button use `random.randint(low, high)` based on the current difficulty, instead of the hardcoded `random.randint(1, 100)`. Plus, the info message now correctly shows which range you're actually playing in with `f"Guess a number between {low} and {high}"`. This way, the secret is always generated within the difficulty you selected, and you know what range to actually guess in.
 
 ---
 
 ## 5. Looking ahead: your developer habits
 
 - What is one habit or strategy from this project that you want to reuse in future labs or projects?
+  Correctly writing tests while i am developing, its not something that is really taught at uni and I know it will make me a better developer
   - This could be a testing habit, a prompting strategy, or a way you used Git.
 - What is one thing you would do differently next time you work with AI on a coding task?
+  create sub agents to work on things in parallel
 - In one or two sentences, describe how this project changed the way you think about AI generated code.
+  Confirmed what I know AI can do and really brought to life how powerful it can be.

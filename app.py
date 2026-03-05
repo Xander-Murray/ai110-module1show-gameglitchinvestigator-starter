@@ -28,7 +28,18 @@ low, high = get_range_for_difficulty(difficulty)
 st.sidebar.caption(f"Range: {low} to {high}")
 st.sidebar.caption(f"Attempts allowed: {attempt_limit}")
 
-if "secret" not in st.session_state:
+# FIX: Regenerate secret when difficulty changes (not just on first load)
+if "current_difficulty" not in st.session_state:
+    st.session_state.current_difficulty = difficulty
+
+if st.session_state.current_difficulty != difficulty:
+    # Difficulty changed - start a new game automatically
+    st.session_state.current_difficulty = difficulty
+    st.session_state.secret = random.randint(low, high)
+    st.session_state.attempts = 0
+    st.session_state.status = "playing"
+elif "secret" not in st.session_state:
+    # First time playing - generate secret for selected difficulty
     st.session_state.secret = random.randint(low, high)
 
 if "attempts" not in st.session_state:
@@ -69,6 +80,7 @@ with col3:
 
 if new_game:
     st.session_state.attempts = 0
+    st.session_state.status = "playing"  # FIX: Reset status so game-over check doesn't trigger
     # FIX: New Game now generates secret from correct difficulty range, not hardcoded 1-100
     st.session_state.secret = random.randint(low, high)
     st.success("New game started.")
